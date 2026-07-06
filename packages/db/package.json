@@ -1,1 +1,27 @@
-{ "name": "@taplink/db", "version": "0.0.1", "private": true }
+{
+  "name": "@taplink/db",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:migrate": "dotenv -e ../../apps/api/.env -- prisma migrate dev",
+    "db:push": "dotenv -e ../../apps/api/.env -- prisma db push",
+    "db:seed": "dotenv -e ../../apps/api/.env -- tsx src/seed.ts",
+    "db:studio": "dotenv -e ../../apps/api/.env -- prisma studio"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.0.0",
+    "dotenv-cli": "^7.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
