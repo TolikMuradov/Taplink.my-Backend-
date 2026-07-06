@@ -1,1 +1,14 @@
-{ "name": "@taplink/types", "version": "0.0.1", "private": true }
+{
+  "name": "@taplink/types",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@taplink/validations": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
