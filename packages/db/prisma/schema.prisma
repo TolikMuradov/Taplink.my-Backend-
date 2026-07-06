@@ -1,0 +1,328 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// ENUM'LAR
+// ─────────────────────────────────────────
+
+enum Plan {
+  FREE
+  PRO
+  BUSINESS
+}
+
+// Profildeki her bloğun tipi
+// Temel tipler her planda — gelişmiş tipler PRO gerektirir
+enum LinkType {
+  LINK            // Standart URL linki
+  SOCIAL          // Sosyal medya ikon satırı (çoklu platform, tek blok)
+  HEADER          // Bölüm başlığı — sadece metin, tıklanamaz
+  DIVIDER         // Görsel ayraç çizgisi
+  EMBED           // YouTube / Spotify / TikTok / Vimeo embed — PRO
+  IMAGE           // Tek görsel, opsiyonel link — PRO
+  MAP             // Google Maps embed — PRO
+  FAQ             // Accordion soru/cevap listesi — PRO
+  COLLECTION      // Card grid grubu (albüm, ürün, kitap vb.) — PRO
+  CONTACT_FORM    // Ziyaretçi mesaj formu, Lead tablosuna kaydedilir — PRO
+  EMAIL_CAPTURE   // Email listesi toplama, Subscriber tablosuna kaydedilir — PRO
+  CONTACT_DETAILS // İletişim bilgileri gösterimi (tel, email, LINE, WhatsApp) — FREE
+  SOCIAL_PROOF    // Takipçi sayısı gösterimi (elle girilen rakamlar) — FREE
+}
+
+// ─────────────────────────────────────────
+// KULLANICI & KİMLİK
+// ─────────────────────────────────────────
+
+// Ana kullanıcı tablosu. Better Auth bu tablosu yönetir,
+// biz plan, dil tercihi ve Stripe alanlarını ekledik.
+model User {
+  id                   String    @id @default(cuid())
+  name                 String
+  email                String    @unique
+  emailVerified        Boolean   @default(false)
+  image                String?
+  plan                 Plan      @default(FREE)
+  preferredLanguage    String    @default("en")
+  // Desteklenen diller: "en" | "th" | "id" | "tl" | "vi" | "tr"
+  // Frontend dil seçimi bu alanı günceller
+  // Email şablonları bu alana göre seçilir
+
+  // Stripe — Step 12'de doldurulur
+  stripeCustomerId     String?   @unique  // Stripe müşteri ID'si (checkout sonrası atanır)
+  stripeSubscriptionId String?   @unique  // Aktif abonelik ID'si (webhook ile güncellenir)
+  planExpiresAt        DateTime?           // Abonelik dönem sonu — null = süresiz veya FREE
+  // planExpiresAt neden var: kullanıcı aboneliği iptal ederse Stripe anında değil
+  // dönem sonunda sona erdirir. Bu tarih geçene kadar PRO özellikler aktif kalır.
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  profile       Profile?
+  sessions      Session[]
+  accounts      Account[]
+  notifications Notification[]
+
+  @@map("user")
+}
+
+// Better Auth: oturum yönetimi
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+// Better Auth: OAuth hesapları (Google, Apple) ve şifre
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String    // "google" | "apple" | "credential"
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?   // email/şifre girişinde hash burada saklanır
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("account")
+}
+
+// Better Auth: email doğrulama ve şifre sıfırlama token'ları
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verification")
+}
+
+// ─────────────────────────────────────────
+// PROFİL & LİNKLER
+// ─────────────────────────────────────────
+
+// Kullanıcının halka açık sayfası
+model Profile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  username        String   @unique   // taplink.my/username
+  displayName     String?
+  bio             String?
+  avatarUrl       String?            // Cloudflare R2 URL (Step 07'de doldurulur)
+  backgroundUrl   String?            // Cloudflare R2 URL (Step 07'de doldurulur)
+  designSettings  Json?
+  // Tüm tasarım ayarları tek JSON alanında — yapı packages/types içinde tanımlı
+  // null = varsayılan tasarım kullan
+  // Örnek yapı:
+  // {
+  //   "type": "custom",
+  //   "wallpaper": { "type": "solid", "color": "#ffffff" },
+  //   "header": { "layout": "centered", "avatarStyle": "circle", "showAvatar": true },
+  //   "text": { "fontFamily": "inter", "titleColor": "#111111", "bioColor": "#666666" },
+  //   "blocks": {
+  //     "style": "filled", "shape": "pill",
+  //     "background": { "type": "solid", "color": "#6366f1" },
+  //     "textColor": "#ffffff", "titleColor": "#ffffff",
+  //     "iconPosition": "left", "shadow": "sm"
+  //   },
+  //   "colors": { "primary": "#6366f1", "background": "#ffffff", "text": "#111111", "accent": "#f59e0b" },
+  //   "footer": { "showBranding": true }
+  // }
+  // Tam yapı için Step 03 → design.schema.ts / design.types.ts'e bak.
+  isPublic        Boolean  @default(true)
+  seoTitle        String?
+  seoDescription  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links       Link[]
+  clicks      Click[]
+  leads       Lead[]
+  subscribers Subscriber[]
+
+  @@map("profile")
+}
+
+// Profildeki her bir blok (link, card, embed, collection vs.)
+// "Link" adı kalıyor ama aslında genel amaçlı bir "block" tablosu
+model Link {
+  id            String    @id @default(cuid())
+  profileId     String
+  type          LinkType  @default(LINK)
+  title         String
+  url           String?   // HEADER, DIVIDER, FAQ, CONTACT_FORM için null olabilir
+
+  // Card görünümü — hangi kart şablonu kullanılıyor
+  // "basic" | "image" | "music" | "book" | "video" | "product"
+  // HEADER/DIVIDER/SOCIAL/FAQ/MAP/EMBED/CONTACT_FORM → cardStyle kullanmaz
+  cardStyle     String    @default("basic")
+
+  // Tip ve card'a özgü ek veri
+  // Yapı packages/types içinde LinkMeta union tipi olarak tanımlı
+  // Örnekler:
+  //   LINK basic:   { iconType, iconValue, description, thumbnailUrl, cardTheme }
+  //   LINK music:   { imageUrl, artist, album, duration, platform, cardTheme }
+  //   LINK book:    { imageUrl, author, description, genre, cardTheme }
+  //   SOCIAL:       { platforms: [{platform, url}], iconStyle, iconSize, layout }
+  //   EMBED:        { platform, embedId, thumbnailUrl }
+  //   FAQ:          { items: [{question, answer}] }
+  //   CONTACT_FORM: { fields, submitButtonText, successMessage, notifyEmail }
+  //   COLLECTION:   { columns, gap, cardTheme }
+  metadata      Json?
+
+  // Sıralama
+  position      Int       // küçük sayı üstte, 0'dan başlar
+
+  // Görünürlük
+  isActive      Boolean   @default(true)
+  isHighlighted Boolean   @default(false)  // öne çıkar — tüm planlarda
+
+  // Zamanlama — PRO
+  // null = her zaman aktif (isActive true ise)
+  // İkisi birlikte kullanılabilir: belirli tarihler arasında göster
+  startsAt      DateTime?
+  endsAt        DateTime?
+
+  // Erişim kısıtlama — PRO
+  password      String?   // bcrypt hash — null = şifresiz
+  clickLimit    Int?      // kaç tıklamadan sonra otomatik kapansın — null = sınırsız
+
+  // Collection için öz-ilişki
+  // COLLECTION tipi: bu alanlar null
+  // COLLECTION'ın çocukları: parentId dolu
+  parentId      String?
+  parent        Link?     @relation("CollectionItems", fields: [parentId], references: [id], onDelete: Cascade)
+  children      Link[]    @relation("CollectionItems")
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile       Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  clicks        Click[]
+
+  // Profil bloklarını sırayla çekmek için
+  @@index([profileId, position])
+  // Zamanlama sorgularında schedule kontrolü için
+  @@index([profileId, isActive, startsAt, endsAt])
+  @@map("link")
+}
+
+// ─────────────────────────────────────────
+// FORM GÖNDERİMLERİ
+// ─────────────────────────────────────────
+
+// CONTACT_FORM bloğuna gelen her mesaj bir Lead kaydı
+model Lead {
+  id        String   @id @default(cuid())
+  profileId String
+  linkId    String?  // hangi CONTACT_FORM bloğundan geldi
+  name      String?
+  email     String
+  phone     String?
+  message   String?
+  createdAt DateTime @default(now())
+
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, createdAt])
+  @@map("lead")
+}
+
+// EMAIL_CAPTURE bloğuna abone olan her ziyaretçi
+// Profil sahibi bu listeyi görebilir, CSV export edebilir
+model Subscriber {
+  id        String   @id @default(cuid())
+  profileId String
+  linkId    String?  // hangi EMAIL_CAPTURE bloğundan geldi
+  email     String
+  name      String?  // opsiyonel — form ayarına göre
+  createdAt DateTime @default(now())
+
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  // Aynı email aynı profile bir kez abone olabilir
+  @@unique([profileId, email])
+  @@index([profileId, createdAt])
+  @@map("subscriber")
+}
+
+// ─────────────────────────────────────────
+// BİLDİRİMLER
+// ─────────────────────────────────────────
+
+// Profil sahibinin dashboard'unda görünen in-app bildirimler
+// Lead geldiğinde, yeni abone olduğunda vb. oluşturulur
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  // Bildirim tipleri:
+  //   "CONTACT_FORM"    — yeni mesaj geldi
+  //   "NEW_SUBSCRIBER"  — yeni email abonesi
+  title     String
+  body      String?
+  data      Json?    // ek veri — lead ID, email adresi vb.
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@map("notification")
+}
+
+// ─────────────────────────────────────────
+// ANALİTİK
+// ─────────────────────────────────────────
+
+// Her tıklama bir kayıt. Redis'ten toplu olarak buraya yazılır (Step 08).
+// linkId null ise bu bir profil görüntülemesidir (link tıklaması değil).
+model Click {
+  id        String   @id @default(cuid())
+  linkId    String?  // null = profil görüntüleme
+  profileId String
+  country   String?  // "TH", "ID", "PH" — ISO 3166-1 alpha-2
+  city      String?
+  device    String?  // "mobile" | "desktop" | "tablet"
+  browser   String?  // "chrome" | "safari" | "firefox"
+  referrer  String?  // nereden geldi: "instagram" | "twitter" | "direct"
+  createdAt DateTime @default(now())
+
+  link    Link?   @relation(fields: [linkId], references: [id], onDelete: SetNull)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  // En sık kullanılacak sorgular için index
+  @@index([profileId, createdAt])
+  @@index([linkId, createdAt])
+  @@map("click")
+}
+
+// NOT: Ayrı Subscription tablosu yok.
+// Stripe alanları (stripeCustomerId, stripeSubscriptionId, planExpiresAt) doğrudan
+// User tablosuna eklendi. Basit PRO/FREE modeli için bu yeterli.
+// Gelecekte çoklu abonelik veya fatura geçmişi gerekirse ayrı tablo açılabilir.

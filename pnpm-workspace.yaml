@@ -5,5 +5,9 @@ packages:
 # pnpm güvenlik için bağımlılıkların build (postinstall) script'lerini
 # varsayılan bloklar. Sadece burada true olanlar çalıştırılır.
 # esbuild → tsx'in native motoru; dev sunucusu için gerekli, güvenli.
+# @prisma/* + prisma → install sırasında Prisma Client üretir / engine indirir.
 allowBuilds:
   esbuild: true
+  "@prisma/client": true
+  "@prisma/engines": true
+  prisma: true
