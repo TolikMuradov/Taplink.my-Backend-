@@ -2,8 +2,14 @@
 
 ## Genel Durum
 
-**Aşama:** Uygulama başladı. **Step 01 tamamlandı ve main'e merge edildi.**
-Sırada Step 02 (Veritabanı Şeması).
+**Aşama:** Uygulama başladı. **Step 01, 02, 03 tamamlandı ve main'e merge edildi.**
+Sırada **Step 04 (Auth)** — bir sonraki oturumda başlanacak.
+
+**Geliştirme ortamı kuruldu (kullanıcı makinesi, macOS/brew):** Node.js (v26),
+pnpm (v11.10), PostgreSQL@16. `taplink_dev` veritabanı var, migration uygulandı,
+seed yüklü. `apps/api/.env` içinde `DATABASE_URL` ayarlı (rol: `toylyrejepmyradov`,
+şifresiz local). NOT: bu ortam sandbox'tan görünmez — Node/pnpm/psql'i buradaki
+kabuk "yok" gösterir ama kullanıcı makinesinde çalışıyor.
 
 Depoda:
 - `AGENTS.md` — Cline's Memory Bank talimatı
@@ -19,9 +25,14 @@ inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
 - **Step 01 ✅** — Fastify API ayakta, `GET /api/health` → 200 dönüyor
   (kullanıcı doğruladı). pnpm workspace + Turborepo kurulu, esbuild build
   onaylı (`allowBuilds`).
-- **Step 02 ✅** — Prisma şeması (10 model + 2 enum), migration + seed çalıştı
-  (kullanıcı doğruladı). db scriptleri `dotenv-cli` ile `apps/api/.env` kullanır.
-  `allowBuilds`'e prisma/@prisma eklendi.
+- **Step 02 ✅** — Prisma şeması (10 model + 2 enum), migration
+  (`20260706200838_init`) uygulandı + seed çalıştı (user+profile+5 link,
+  gerçek PostgreSQL'de doğrulandı). db scriptleri `dotenv-cli` ile
+  `apps/api/.env` kullanır. `allowBuilds`'e prisma/@prisma eklendi.
+- **Step 03 ✅** — `@taplink/validations` (Zod şemaları + error-codes) ve
+  `@taplink/types` (response tipleri + DEFAULT_DESIGN). `RegisterSchema` testi
+  geçersiz veride `false` döndü (doğrulandı). `api.types.ts` `ErrorCode`'u
+  `@taplink/validations`'dan alır (types → validations tip bağımlılığı).
 
 ## Yapılacaklar (Step Sırasıyla)
 
@@ -29,8 +40,8 @@ inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
 |------|------|-------|-----------|
 | 01 | Monorepo & API iskeleti | ✅ Tamam (merge) | Fastify + `/api/health`, turbo, pnpm workspace |
 | 02 | Veritabanı şeması | ✅ Tamam (merge) | Prisma şema (User, Profile, Link, Click, Lead, Subscriber, Notification + Better Auth tabloları), migration, seed |
-| 03 | Shared tipler & validasyonlar | 🔨 Devam ediyor | Zod şemaları, response tipleri, error-codes, DEFAULT_DESIGN |
-| 04 | Auth & kullanıcı | ⬜ Planlandı | Better Auth, Google OAuth, Mailjet, requireAuth, auth rate limit, /me endpoint'leri |
+| 03 | Shared tipler & validasyonlar | ✅ Tamam (merge) | Zod şemaları, response tipleri, error-codes, DEFAULT_DESIGN |
+| 04 | Auth & kullanıcı | ⬜ Sıradaki | Better Auth, Google OAuth, Mailjet, requireAuth, auth rate limit, /me endpoint'leri |
 | 05 | Profil modülü | ⬜ Planlandı | Curated şablonlar, requirePlan, profil CRUD, username kontrol |
 | 06 | Link & block modülü | ⬜ Planlandı | Block CRUD, reorder, metadata late-binding, collection, unlock |
 | 07 | Dosya yükleme (R2) | ⬜ Planlandı | Sharp pipeline, R2 upload/delete, avatar/bg/card |

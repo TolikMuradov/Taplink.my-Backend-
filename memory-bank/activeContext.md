@@ -2,20 +2,28 @@
 
 ## Şu Anki Çalışma Odağı
 
-**Step 03 — Shared Tipler & Validasyonlar** üzerinde çalışılıyor
-(`step-03-shared-tipler-validasyonlar` branch). Step 01 ve 02 tamamlandı,
-main'e merge edildi.
+**Bugünlük duruldu (2026-07-07).** Step 01, 02, 03 tamamlandı ve main'e merge
+edildi. Geliştirme ortamı kuruldu ve çalışıyor (Node/pnpm/PostgreSQL). Bir
+sonraki oturumda **Step 04 (Auth)** ile devam edilecek.
 
-Step 03 hedefi: `packages/validations` (Zod şemaları + error-codes) ve
-`packages/types` (API response tipleri + DEFAULT_DESIGN). Projenin "ortak dili".
-En riskli step — bir tip yanlışı onlarca yeri kırar.
+## Sonraki Adımlar (Step 04 — Auth)
 
-## Sonraki Adımlar
+Step 04'e başlamadan önce kullanıcının hazırlaması gereken dış servisler
+(kod yazılabilir ama tam test için gerekli):
+1. **Google OAuth** — Cloud Console → OAuth 2.0 Client (Web). Redirect URI:
+   `http://localhost:3001/api/auth/callback/google` → `GOOGLE_CLIENT_ID/SECRET`
+2. **Upstash Redis** — ücretsiz DB → `UPSTASH_REDIS_REST_URL` + `_TOKEN`
+3. **Mailjet** — API Key + Secret (email doğrulama/şifre sıfırlama)
 
-1. Step 03 kodu yazılıp branch'e commit → kullanıcı doğrular → main'e merge.
-2. Doğrulama: `pnpm install` + TS tip kontrolü (bu step runtime gerektirmez,
-   local PostgreSQL de gerekmez).
-3. Sonra Step 04 (auth). Step'ler katı bağımlılık sırasıyla (01→12).
+Step 04 kapsamı: Better Auth (cookie session), email+şifre + Google OAuth,
+Mailjet mailer (6 dil), `requireAuth` middleware, auth rate limit (Upstash),
+`src/lib/redis.ts` paylaşımlı client, `/api/me` endpoint'leri. Email doğrulama
+SONRASI profil oluşturma hook'u (isPublic: false). Branch: `step-04-auth-modulu`.
+
+## Akış Hatırlatma
+Her step kendi `step-NN-...` branch'inde yazılır → kullanıcı doğrular →
+`--no-ff` main'e merge → memory bank güncellenir. Step 04+ için `.env`'e yeni
+secret'lar eklenecek (gitignore'da, commit edilmez).
 
 ## Aktif Kararlar & Değerlendirmeler
 
