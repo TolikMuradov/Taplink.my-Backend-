@@ -2,17 +2,21 @@
 
 ## Şu Anki Çalışma Odağı
 
-**Memory Bank ilk kez kuruldu** (bu oturum). Projenin tamamı incelendi:
-`AGENTS.md` (Cline's Memory Bank talimatı) ve `backend stepbystep plan/`
-içindeki 12 step dokümanı okundu. Kod henüz yok — proje planlama aşamasında.
+**Step 02 — Veritabanı Şeması** üzerinde çalışılıyor (`step-02-veritabani-semasi`
+branch). Step 01 (monorepo + Fastify) tamamlandı, `/api/health` 200 dönüyor,
+main'e merge edildi.
+
+Step 02 hedefi: `packages/db`'ye Prisma kurmak, tüm tabloları (`schema.prisma`)
+tanımlamak, migration + seed. Bu step'te iş mantığı YOK, sadece şema.
+**Gereksinim:** local PostgreSQL çalışıyor olmalı (`createdb taplink_dev`).
 
 ## Sonraki Adımlar
 
-1. Uygulamaya **Step 01**'den başlanacak: monorepo iskeleti (pnpm workspace,
-   turbo, Fastify `/api/health`).
-2. Her step tamamlandıkça `progress.md`'deki tablo güncellenecek (⬜ → ✅) ve
-   `activeContext.md` o an çalışılan step'i yansıtacak.
-3. Step'ler katı bağımlılık sırasıyla ilerler (01→12); atlanamaz.
+1. Step 02 kodu yazılıp branch'e commit edilecek → kullanıcı doğrular →
+   main'e merge.
+2. Step 02 doğrulaması için kullanıcının local PostgreSQL'i gerekli
+   (`pnpm db:migrate`, `db:seed`, `db:studio`).
+3. Sonra Step 03 (tipler/validasyonlar). Step'ler katı bağımlılık sırasıyla (01→12).
 
 ## Aktif Kararlar & Değerlendirmeler
 

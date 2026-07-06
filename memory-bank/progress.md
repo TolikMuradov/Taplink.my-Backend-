@@ -2,27 +2,30 @@
 
 ## Genel Durum
 
-**Aşama:** Backend planlaması tamamlandı, uygulama (kodlama) **henüz başlamadı.**
+**Aşama:** Uygulama başladı. **Step 01 tamamlandı ve main'e merge edildi.**
+Sırada Step 02 (Veritabanı Şeması).
 
-Depoda şu an yalnızca:
+Depoda:
 - `AGENTS.md` — Cline's Memory Bank talimatı
 - `backend stepbystep plan/` — 12 adımlık detaylı, sıralı uygulama planı
-- `memory-bank/` — bu memory bank (yeni kuruldu)
+- `memory-bank/` — memory bank
+- `apps/api`, `packages/*`, root config — Step 01 çıktısı (çalışıyor)
 
-Kod (`apps/`, `packages/`) henüz oluşturulmadı. Her step dokümanı; amaç, karar
-gerekçeleri, tam kod örnekleri, debug notları, güvenlik notları ve teslim
-kriterleri içerir — koda birebir dönüştürülmeye hazırdır.
+Git akışı: her step kendi branch'inde yazılır (`step-NN-...`), kullanıcı
+inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
 
 ## Çalışan Ne Var?
 
-- Hiçbir çalışan kod yok. Sadece plan dokümanları hazır.
+- **Step 01 ✅** — Fastify API ayakta, `GET /api/health` → 200 dönüyor
+  (kullanıcı doğruladı). pnpm workspace + Turborepo kurulu, esbuild build
+  onaylı (`allowBuilds`).
 
 ## Yapılacaklar (Step Sırasıyla)
 
 | Step | Konu | Durum | Ana çıktı |
 |------|------|-------|-----------|
-| 01 | Monorepo & API iskeleti | ⬜ Planlandı | Fastify + `/api/health`, turbo, pnpm workspace |
-| 02 | Veritabanı şeması | ⬜ Planlandı | Prisma şema (User, Profile, Link, Click, Lead, Subscriber, Notification + Better Auth tabloları), migration, seed |
+| 01 | Monorepo & API iskeleti | ✅ Tamam (merge) | Fastify + `/api/health`, turbo, pnpm workspace |
+| 02 | Veritabanı şeması | 🔨 Devam ediyor | Prisma şema (User, Profile, Link, Click, Lead, Subscriber, Notification + Better Auth tabloları), migration, seed |
 | 03 | Shared tipler & validasyonlar | ⬜ Planlandı | Zod şemaları, response tipleri, error-codes, DEFAULT_DESIGN |
 | 04 | Auth & kullanıcı | ⬜ Planlandı | Better Auth, Google OAuth, Mailjet, requireAuth, auth rate limit, /me endpoint'leri |
 | 05 | Profil modülü | ⬜ Planlandı | Curated şablonlar, requirePlan, profil CRUD, username kontrol |
