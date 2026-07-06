@@ -19,14 +19,17 @@ inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
 - **Step 01 ✅** — Fastify API ayakta, `GET /api/health` → 200 dönüyor
   (kullanıcı doğruladı). pnpm workspace + Turborepo kurulu, esbuild build
   onaylı (`allowBuilds`).
+- **Step 02 ✅** — Prisma şeması (10 model + 2 enum), migration + seed çalıştı
+  (kullanıcı doğruladı). db scriptleri `dotenv-cli` ile `apps/api/.env` kullanır.
+  `allowBuilds`'e prisma/@prisma eklendi.
 
 ## Yapılacaklar (Step Sırasıyla)
 
 | Step | Konu | Durum | Ana çıktı |
 |------|------|-------|-----------|
 | 01 | Monorepo & API iskeleti | ✅ Tamam (merge) | Fastify + `/api/health`, turbo, pnpm workspace |
-| 02 | Veritabanı şeması | 🔨 Devam ediyor | Prisma şema (User, Profile, Link, Click, Lead, Subscriber, Notification + Better Auth tabloları), migration, seed |
-| 03 | Shared tipler & validasyonlar | ⬜ Planlandı | Zod şemaları, response tipleri, error-codes, DEFAULT_DESIGN |
+| 02 | Veritabanı şeması | ✅ Tamam (merge) | Prisma şema (User, Profile, Link, Click, Lead, Subscriber, Notification + Better Auth tabloları), migration, seed |
+| 03 | Shared tipler & validasyonlar | 🔨 Devam ediyor | Zod şemaları, response tipleri, error-codes, DEFAULT_DESIGN |
 | 04 | Auth & kullanıcı | ⬜ Planlandı | Better Auth, Google OAuth, Mailjet, requireAuth, auth rate limit, /me endpoint'leri |
 | 05 | Profil modülü | ⬜ Planlandı | Curated şablonlar, requirePlan, profil CRUD, username kontrol |
 | 06 | Link & block modülü | ⬜ Planlandı | Block CRUD, reorder, metadata late-binding, collection, unlock |

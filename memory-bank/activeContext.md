@@ -2,21 +2,20 @@
 
 ## Şu Anki Çalışma Odağı
 
-**Step 02 — Veritabanı Şeması** üzerinde çalışılıyor (`step-02-veritabani-semasi`
-branch). Step 01 (monorepo + Fastify) tamamlandı, `/api/health` 200 dönüyor,
+**Step 03 — Shared Tipler & Validasyonlar** üzerinde çalışılıyor
+(`step-03-shared-tipler-validasyonlar` branch). Step 01 ve 02 tamamlandı,
 main'e merge edildi.
 
-Step 02 hedefi: `packages/db`'ye Prisma kurmak, tüm tabloları (`schema.prisma`)
-tanımlamak, migration + seed. Bu step'te iş mantığı YOK, sadece şema.
-**Gereksinim:** local PostgreSQL çalışıyor olmalı (`createdb taplink_dev`).
+Step 03 hedefi: `packages/validations` (Zod şemaları + error-codes) ve
+`packages/types` (API response tipleri + DEFAULT_DESIGN). Projenin "ortak dili".
+En riskli step — bir tip yanlışı onlarca yeri kırar.
 
 ## Sonraki Adımlar
 
-1. Step 02 kodu yazılıp branch'e commit edilecek → kullanıcı doğrular →
-   main'e merge.
-2. Step 02 doğrulaması için kullanıcının local PostgreSQL'i gerekli
-   (`pnpm db:migrate`, `db:seed`, `db:studio`).
-3. Sonra Step 03 (tipler/validasyonlar). Step'ler katı bağımlılık sırasıyla (01→12).
+1. Step 03 kodu yazılıp branch'e commit → kullanıcı doğrular → main'e merge.
+2. Doğrulama: `pnpm install` + TS tip kontrolü (bu step runtime gerektirmez,
+   local PostgreSQL de gerekmez).
+3. Sonra Step 04 (auth). Step'ler katı bağımlılık sırasıyla (01→12).
 
 ## Aktif Kararlar & Değerlendirmeler
 
