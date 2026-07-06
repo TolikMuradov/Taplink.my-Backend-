@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build çıktıları
+dist/
+.next/
+out/
+
+# Turborepo
+.turbo/
+
+# Ortam değişkenleri (secret içerir — asla commit edilmez)
+.env
+.env.local
+.env.*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Prisma
+packages/db/prisma/migrations/dev.db*
+
+# Log
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
