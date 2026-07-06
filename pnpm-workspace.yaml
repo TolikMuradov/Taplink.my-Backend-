@@ -1,3 +1,9 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# pnpm güvenlik için bağımlılıkların build (postinstall) script'lerini
+# varsayılan bloklar. Sadece burada true olanlar çalıştırılır.
+# esbuild → tsx'in native motoru; dev sunucusu için gerekli, güvenli.
+allowBuilds:
+  esbuild: true
