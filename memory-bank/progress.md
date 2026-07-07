@@ -2,8 +2,9 @@
 
 ## Genel Durum
 
-**Aşama:** Uygulama başladı. **Step 01, 02, 03 tamamlandı ve main'e merge edildi.**
-Sırada **Step 04 (Auth)** — bir sonraki oturumda başlanacak.
+**Aşama:** Uygulama başladı. **Step 01, 02, 03, 04 tamamlandı ve main'e merge
+edildi.** Sırada **Step 05 (Profil Modülü)** — DB + auth dışında ekstra servis
+gerektirmez.
 
 **Geliştirme ortamı kuruldu (kullanıcı makinesi, macOS/brew):** Node.js (v26),
 pnpm (v11.10), PostgreSQL@16. `taplink_dev` veritabanı var, migration uygulandı,
@@ -33,6 +34,14 @@ inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
   `@taplink/types` (response tipleri + DEFAULT_DESIGN). `RegisterSchema` testi
   geçersiz veride `false` döndü (doğrulandı). `api.types.ts` `ErrorCode`'u
   `@taplink/validations`'dan alır (types → validations tip bağımlılığı).
+- **Step 04 ✅** — Better Auth (email+şifre, Google OAuth hazır), Mailjet mailer
+  (6 dil), `requireAuth`, auth rate limit (Upstash), `/api/me` endpoint'leri,
+  `src/lib/redis.ts` paylaşımlı client. Uçtan uca doğrulandı: kayıt → gerçek
+  doğrulama emaili → email doğrulama → giriş + session → profil (isPublic:false).
+  **2 doküman düzeltmesi:** (1) profil oluşturma `databaseHooks.user.create.after`
+  ile (dokümanın `hooks.after:[{matcher}]` formatı BA 1.x'te geçersiz);
+  (2) auth route delege `auth.handler(request.raw)` yerine Fastify body'sinden
+  Web Request yeniden kurularak (raw Node stream Web Request değil).
 
 ## Yapılacaklar (Step Sırasıyla)
 
@@ -41,8 +50,8 @@ inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
 | 01 | Monorepo & API iskeleti | ✅ Tamam (merge) | Fastify + `/api/health`, turbo, pnpm workspace |
 | 02 | Veritabanı şeması | ✅ Tamam (merge) | Prisma şema (User, Profile, Link, Click, Lead, Subscriber, Notification + Better Auth tabloları), migration, seed |
 | 03 | Shared tipler & validasyonlar | ✅ Tamam (merge) | Zod şemaları, response tipleri, error-codes, DEFAULT_DESIGN |
-| 04 | Auth & kullanıcı | ⬜ Sıradaki | Better Auth, Google OAuth, Mailjet, requireAuth, auth rate limit, /me endpoint'leri |
-| 05 | Profil modülü | ⬜ Planlandı | Curated şablonlar, requirePlan, profil CRUD, username kontrol |
+| 04 | Auth & kullanıcı | ✅ Tamam (merge) | Better Auth, Google OAuth, Mailjet, requireAuth, auth rate limit, /me endpoint'leri |
+| 05 | Profil modülü | 🔨 Devam ediyor | Curated şablonlar, requirePlan, profil CRUD, username kontrol |
 | 06 | Link & block modülü | ⬜ Planlandı | Block CRUD, reorder, metadata late-binding, collection, unlock |
 | 07 | Dosya yükleme (R2) | ⬜ Planlandı | Sharp pipeline, R2 upload/delete, avatar/bg/card |
 | 08 | Analytics | ⬜ Planlandı | Redis buffer, HyperLogLog, batch flush, overview/links/breakdown |

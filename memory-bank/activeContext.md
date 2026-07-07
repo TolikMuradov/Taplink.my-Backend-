@@ -2,23 +2,23 @@
 
 ## Şu Anki Çalışma Odağı
 
-**Bugünlük duruldu (2026-07-07).** Step 01, 02, 03 tamamlandı ve main'e merge
-edildi. Geliştirme ortamı kuruldu ve çalışıyor (Node/pnpm/PostgreSQL). Bir
-sonraki oturumda **Step 04 (Auth)** ile devam edilecek.
+**Step 05 — Profil Modülü** üzerinde çalışılıyor (`step-05-profil-modulu`).
+Step 01-04 tamam+merge. Tüm dış servisler (Google/Redis/Mailjet) kurulu ve
+`.env` dolu. Auth uçtan uca çalışıyor.
 
-## Sonraki Adımlar (Step 04 — Auth)
+Step 05 kapsamı: profil sahibinin kendi profilini yönetmesi.
+- `profile.templates.ts` — curated şablonlar (FREE: classic-light, midnight-dark;
+  PRO: aurora-gradient, minimal-sans)
+- `utils/plan.ts` — `hasPlan`/`requirePlan` (sync; Step 12'de async'e dönecek)
+- `profile.service.ts` + `profile.routes.ts` — GET/PATCH /api/profile/me,
+  DELETE customization, GET /api/templates, GET check-username
+- Plan kilitleri: custom tasarım + PRO şablon + branding kaldırma → PRO gerekir
+Ekstra servis/DB dışı bağımlılık YOK. Test: local DB yeterli.
 
-Step 04'e başlamadan önce kullanıcının hazırlaması gereken dış servisler
-(kod yazılabilir ama tam test için gerekli):
-1. **Google OAuth** — Cloud Console → OAuth 2.0 Client (Web). Redirect URI:
-   `http://localhost:3001/api/auth/callback/google` → `GOOGLE_CLIENT_ID/SECRET`
-2. **Upstash Redis** — ücretsiz DB → `UPSTASH_REDIS_REST_URL` + `_TOKEN`
-3. **Mailjet** — API Key + Secret (email doğrulama/şifre sıfırlama)
-
-Step 04 kapsamı: Better Auth (cookie session), email+şifre + Google OAuth,
-Mailjet mailer (6 dil), `requireAuth` middleware, auth rate limit (Upstash),
-`src/lib/redis.ts` paylaşımlı client, `/api/me` endpoint'leri. Email doğrulama
-SONRASI profil oluşturma hook'u (isPublic: false). Branch: `step-04-auth-modulu`.
+## Env Kimlik Bilgileri (kuruldu — apps/api/.env, gitignore'da)
+Google OAuth, Upstash Redis, Mailjet (API Key+Secret), BETTER_AUTH_SECRET hepsi
+dolu. Test kullanıcısı: tolikmuradov00@gmail.com (emailVerified, plan FREE).
+Not: localhost linkler sadece sunucuyu çalıştıran Mac'te açılır.
 
 ## Akış Hatırlatma
 Her step kendi `step-NN-...` branch'inde yazılır → kullanıcı doğrular →
