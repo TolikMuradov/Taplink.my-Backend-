@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { ErrorCodes } from '@taplink/validations'
 import type { CreateLinkInput, UpdateLinkInput, ReorderLinksInput } from '@taplink/validations'
 import { parseMetadata, requiresProPlan } from './link.helpers'
+import { deleteFromR2 } from '../upload/upload.service'
 
 // ─────────────────────────────────────────
 // OKUMA
@@ -158,6 +159,20 @@ export async function updateLink(
       clickLimit:    input.clickLimit,
     },
   })
+
+  // Card görseli değiştiyse eski R2 dosyasını sil (depolama birikmesin)
+  const oldMeta = existing.metadata as any
+  const newMeta = parsedMeta as any
+  const r2Base  = process.env.R2_PUBLIC_URL ?? ''
+  if (
+    oldMeta?.imageUrl &&
+    newMeta?.imageUrl &&
+    oldMeta.imageUrl !== newMeta.imageUrl &&
+    r2Base &&
+    oldMeta.imageUrl.includes(r2Base)
+  ) {
+    await deleteFromR2(oldMeta.imageUrl)  // sessiz hata — silme başarısız olsa da devam
+  }
 
   return { error: null, link }
 }
