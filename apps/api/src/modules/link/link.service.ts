@@ -4,6 +4,7 @@ import { ErrorCodes } from '@taplink/validations'
 import type { CreateLinkInput, UpdateLinkInput, ReorderLinksInput } from '@taplink/validations'
 import { parseMetadata, requiresProPlan } from './link.helpers'
 import { deleteFromR2 } from '../upload/upload.service'
+import { invalidateProfileCacheByProfileId } from '../../lib/cache'
 
 // ─────────────────────────────────────────
 // OKUMA
@@ -90,6 +91,7 @@ export async function createLink(
     },
   })
 
+  await invalidateProfileCacheByProfileId(profileId)
   return { error: null, link }
 }
 
@@ -174,6 +176,7 @@ export async function updateLink(
     await deleteFromR2(oldMeta.imageUrl)  // sessiz hata — silme başarısız olsa da devam
   }
 
+  await invalidateProfileCacheByProfileId(profileId)
   return { error: null, link }
 }
 
@@ -189,6 +192,7 @@ export async function deleteLink(linkId: string, profileId: string) {
 
   // COLLECTION silinince çocuklar otomatik silinir (onDelete: Cascade — Step 02)
   await prisma.link.delete({ where: { id: linkId } })
+  await invalidateProfileCacheByProfileId(profileId)
   return { error: null }
 }
 
@@ -221,6 +225,7 @@ export async function reorderLinks(
     )
   )
 
+  await invalidateProfileCacheByProfileId(profileId)
   return { error: null }
 }
 

@@ -10,6 +10,7 @@ import { linkRoutes } from './modules/link/link.routes'
 import { uploadRoutes } from './modules/upload/upload.routes'
 import { analyticsRoutes } from './modules/analytics/analytics.routes'
 import { startAnalyticsJob } from './modules/analytics/analytics.job'
+import { publicRoutes } from './modules/public/public.routes'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -50,6 +51,9 @@ server.register(uploadRoutes)
 
 // Analytics — /api/analytics/*
 server.register(analyticsRoutes)
+
+// Public profil API — /api/p/* (ziyaretçi, auth yok)
+server.register(publicRoutes)
 
 // Analytics batch flush job — uygulama hazır olunca başlat
 server.ready(() => {
