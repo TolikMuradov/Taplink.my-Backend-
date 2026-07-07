@@ -2,6 +2,8 @@ import 'dotenv/config'
 import Fastify from 'fastify'
 import corsPlugin from './plugins/cors'
 import helmetPlugin from './plugins/helmet'
+import authPlugin from './modules/auth/auth.plugin'
+import { userRoutes } from './modules/auth/user.routes'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -18,6 +20,10 @@ const server = Fastify({
 // Plugin'leri kaydet
 server.register(corsPlugin)
 server.register(helmetPlugin)
+
+// Auth modülü — session preHandler, /api/auth/*, /api/me endpoint'leri
+server.register(authPlugin)
+server.register(userRoutes)
 
 // Sağlık kontrolü endpoint'i
 // /api/health olarak tanımlıyoruz — Step 11'deki rate limit muafiyet listesiyle tutarlı
