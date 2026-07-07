@@ -8,6 +8,8 @@ import { userRoutes } from './modules/auth/user.routes'
 import { profileRoutes } from './modules/profile/profile.routes'
 import { linkRoutes } from './modules/link/link.routes'
 import { uploadRoutes } from './modules/upload/upload.routes'
+import { analyticsRoutes } from './modules/analytics/analytics.routes'
+import { startAnalyticsJob } from './modules/analytics/analytics.job'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -45,6 +47,14 @@ server.register(linkRoutes)
 
 // Dosya yükleme — /api/upload/*
 server.register(uploadRoutes)
+
+// Analytics — /api/analytics/*
+server.register(analyticsRoutes)
+
+// Analytics batch flush job — uygulama hazır olunca başlat
+server.ready(() => {
+  startAnalyticsJob()
+})
 
 // Sağlık kontrolü endpoint'i
 // /api/health olarak tanımlıyoruz — Step 11'deki rate limit muafiyet listesiyle tutarlı
