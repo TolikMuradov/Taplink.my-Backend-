@@ -2,18 +2,22 @@
 
 ## Şu Anki Çalışma Odağı
 
-**Step 05 — Profil Modülü** üzerinde çalışılıyor (`step-05-profil-modulu`).
-Step 01-04 tamam+merge. Tüm dış servisler (Google/Redis/Mailjet) kurulu ve
-`.env` dolu. Auth uçtan uca çalışıyor.
+**Step 06 — Link & Block Modülü** üzerinde çalışılıyor (`step-06-link-block-modulu`).
+Step 01-05 tamam+merge. Auth + profil çalışıyor. Ekstra servis YOK (bcryptjs eklenir).
 
-Step 05 kapsamı: profil sahibinin kendi profilini yönetmesi.
-- `profile.templates.ts` — curated şablonlar (FREE: classic-light, midnight-dark;
-  PRO: aurora-gradient, minimal-sans)
-- `utils/plan.ts` — `hasPlan`/`requirePlan` (sync; Step 12'de async'e dönecek)
-- `profile.service.ts` + `profile.routes.ts` — GET/PATCH /api/profile/me,
-  DELETE customization, GET /api/templates, GET check-username
-- Plan kilitleri: custom tasarım + PRO şablon + branding kaldırma → PRO gerekir
-Ekstra servis/DB dışı bağımlılık YOK. Test: local DB yeterli.
+Step 06 kapsamı: block CRUD, reorder (batch), metadata late-binding validation
+(type+cardStyle → doğru Zod şeması), COLLECTION self-relation, şifreli link unlock,
+PRO kilitleri (music/book/video/product card + IMAGE/MAP/FAQ/CONTACT_FORM/
+EMAIL_CAPTURE/COLLECTION + schedule/password/clickLimit).
+
+### ⚠️ Önemli düzeltme (Step 06'da uygulanıyor)
+Better Auth session `user` nesnesinde `profileId` ve `plan` YOK (sadece id, name,
+email, emailVerified, image, createdAt, updatedAt). Dokümanın Step 06 kodu
+`req.user.profileId` ve `req.user.plan` kullanıyor — bunlar undefined olur.
+Çözüm: `utils/context.ts` içinde `getProfileContext(userId)` helper'ı — userId'den
+tek sorguda `{ profileId, plan }` çeker (profile.id + user.plan). Tüm authed
+route'lar (link, sonra analytics/leads) bunu kullanır. (Step 05 profil route'u
+zaten plan'ı DB'den çekiyordu — aynı yaklaşım.)
 
 ## Env Kimlik Bilgileri (kuruldu — apps/api/.env, gitignore'da)
 Google OAuth, Upstash Redis, Mailjet (API Key+Secret), BETTER_AUTH_SECRET hepsi
