@@ -2,9 +2,9 @@
 
 ## Genel Durum
 
-**Aşama:** Uygulama başladı. **Step 01–05 tamamlandı ve main'e merge edildi.**
-Sırada **Step 06 (Link & Block Modülü)** — projenin asıl "blok sistemi", ekstra
-servis gerektirmez.
+**Aşama:** Uygulama başladı. **Step 01–06 tamamlandı ve main'e merge edildi.**
+Sırada **Step 07 (Dosya Yükleme — Cloudflare R2)** — dış servis (R2) hazırlığı
+gerektirir.
 
 **Geliştirme ortamı kuruldu (kullanıcı makinesi, macOS/brew):** Node.js (v26),
 pnpm (v11.10), PostgreSQL@16. `taplink_dev` veritabanı var, migration uygulandı,
@@ -45,6 +45,11 @@ inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
 - **Step 05 ✅** — Profil modülü: `utils/plan.ts` (hasPlan/requirePlan), 4 curated
   şablon, profil CRUD, username kontrol, `/api/templates`. Plan kilitleri service
   katmanında. Doğrulandı: FREE hesapta custom tasarım → 403.
+- **Step 06 ✅** — Link & block modülü: block CRUD, reorder, metadata late-binding,
+  collection self-relation, şifreli unlock (bcrypt). Doğrulandı: basic 201, music
+  kartı FREE → 403, hash sızmıyor (hasPassword). **Düzeltmeler:** (1) `getProfileContext`
+  helper'ı (session'da profileId/plan yok); (2) Prisma select'te `password:false`
+  yerine alan hiç seçilmedi.
 
 ## Yapılacaklar (Step Sırasıyla)
 
@@ -55,8 +60,8 @@ inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
 | 03 | Shared tipler & validasyonlar | ✅ Tamam (merge) | Zod şemaları, response tipleri, error-codes, DEFAULT_DESIGN |
 | 04 | Auth & kullanıcı | ✅ Tamam (merge) | Better Auth, Google OAuth, Mailjet, requireAuth, auth rate limit, /me endpoint'leri |
 | 05 | Profil modülü | ✅ Tamam (merge) | Curated şablonlar, requirePlan, profil CRUD, username kontrol |
-| 06 | Link & block modülü | 🔨 Devam ediyor | Block CRUD, reorder, metadata late-binding, collection, unlock |
-| 07 | Dosya yükleme (R2) | ⬜ Planlandı | Sharp pipeline, R2 upload/delete, avatar/bg/card |
+| 06 | Link & block modülü | ✅ Tamam (merge) | Block CRUD, reorder, metadata late-binding, collection, unlock |
+| 07 | Dosya yükleme (R2) | ⬜ Sıradaki | Sharp pipeline, R2 upload/delete, avatar/bg/card — R2 hesabı gerekir |
 | 08 | Analytics | ⬜ Planlandı | Redis buffer, HyperLogLog, batch flush, overview/links/breakdown |
 | 09 | Public profil API | ⬜ Planlandı | İki katmanlı cache, tıklama akışı, cache invalidation (EN KRİTİK) |
 | 10 | Forms, capture, notifications | ⬜ Planlandı | Lead/Subscriber kaydı, in-app bildirim, CSV export |
