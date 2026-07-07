@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import Fastify from 'fastify'
 import multipart from '@fastify/multipart'
+import rawBody from 'fastify-raw-body'
 import corsPlugin from './plugins/cors'
 import helmetPlugin from './plugins/helmet'
 import rateLimitPlugin from './plugins/rate-limit.plugin'
@@ -15,6 +16,7 @@ import { publicRoutes } from './modules/public/public.routes'
 import { formsRoutes } from './modules/forms/forms.routes'
 import { notificationsRoutes } from './modules/notifications/notifications.routes'
 import { leadsRoutes } from './modules/leads/leads.routes'
+import { stripeRoutes } from './stripe/stripe.routes'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -26,6 +28,15 @@ const server = Fastify({
       ? { target: 'pino-pretty', options: { colorize: true } }
       : undefined,
   },
+})
+
+// Stripe webhook için ham body (imza doğrulaması) — JSON parse'dan önce,
+// sadece config.rawBody:true olan route'larda (webhook). runFirst: erken çalışsın.
+server.register(rawBody, {
+  field:    'rawBody',
+  global:   false,
+  encoding: 'utf8',
+  runFirst: true,
 })
 
 // Plugin'leri kaydet
@@ -66,6 +77,9 @@ server.register(publicRoutes)
 server.register(formsRoutes)
 server.register(notificationsRoutes)
 server.register(leadsRoutes)
+
+// Stripe — /api/stripe/* (checkout, portal, status, webhook)
+server.register(stripeRoutes)
 
 // Analytics batch flush job — uygulama hazır olunca başlat
 server.ready(() => {

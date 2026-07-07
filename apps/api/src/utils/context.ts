@@ -17,9 +17,16 @@ export async function getProfileContext(
     where: { userId },
     select: {
       id: true,
-      user: { select: { plan: true } },
+      user: { select: { plan: true, planExpiresAt: true } },
     },
   })
   if (!profile) return null
-  return { profileId: profile.id, plan: profile.user.plan }
+
+  // Effective plan: abonelik iptal edilip dönemi de geçmişse PRO/BUSINESS → FREE.
+  // (Webhook plan'ı zaten günceller ama bu, kaçan webhook'a karşı güvenlik ağı.)
+  const { plan, planExpiresAt } = profile.user
+  const isExpired = planExpiresAt != null && planExpiresAt < new Date()
+  const effectivePlan: Plan = plan !== 'FREE' && isExpired ? 'FREE' : plan
+
+  return { profileId: profile.id, plan: effectivePlan }
 }
