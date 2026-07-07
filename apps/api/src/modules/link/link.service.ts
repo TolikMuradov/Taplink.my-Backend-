@@ -5,6 +5,7 @@ import type { CreateLinkInput, UpdateLinkInput, ReorderLinksInput } from '@tapli
 import { parseMetadata, requiresProPlan } from './link.helpers'
 import { deleteFromR2 } from '../upload/upload.service'
 import { invalidateProfileCacheByProfileId } from '../../lib/cache'
+import { createUnlockToken } from '../../lib/link-token'
 
 // ─────────────────────────────────────────
 // OKUMA
@@ -245,7 +246,7 @@ export async function unlockLink(linkId: string, password: string) {
   const match = await bcrypt.compare(password, link.password)
   if (!match) return { error: ErrorCodes.LINK_PASSWORD_INCORRECT, token: null }
 
-  // Kısa süreli erişim token'ı — Step 09'da doğrulanır
-  const token = Buffer.from(`${linkId}:${Date.now()}`).toString('base64')
+  // Kısa süreli, HMAC İMZALI erişim token'ı (public.helpers doğrular)
+  const token = createUnlockToken(linkId)
   return { error: null, token }
 }
