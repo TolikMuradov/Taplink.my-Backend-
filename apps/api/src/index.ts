@@ -5,6 +5,7 @@ import helmetPlugin from './plugins/helmet'
 import authPlugin from './modules/auth/auth.plugin'
 import { userRoutes } from './modules/auth/user.routes'
 import { profileRoutes } from './modules/profile/profile.routes'
+import { linkRoutes } from './modules/link/link.routes'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -28,6 +29,9 @@ server.register(userRoutes)
 
 // Profil modülü — /api/profile/*, /api/templates
 server.register(profileRoutes)
+
+// Link & Block modülü — /api/links/*
+server.register(linkRoutes)
 
 // Sağlık kontrolü endpoint'i
 // /api/health olarak tanımlıyoruz — Step 11'deki rate limit muafiyet listesiyle tutarlı
