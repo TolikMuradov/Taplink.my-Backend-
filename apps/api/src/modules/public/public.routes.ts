@@ -4,6 +4,8 @@ import { getPublicProfile, processLinkClick } from './public.service'
 import { recordClick, recordView }            from '../analytics/analytics.service'
 import { getVisitorIp, getDeviceType, getReferrer, getCountry } from './public.helpers'
 import { ErrorCodes }       from '@taplink/validations'
+import { checkRateLimit }   from '../../lib/rate-limit'
+import { redis }            from '../../lib/redis'
 
 export async function publicRoutes(fastify: FastifyInstance) {
 
@@ -11,6 +13,7 @@ export async function publicRoutes(fastify: FastifyInstance) {
   // GET /api/p/:username — Profil verisi (auth yok)
   // ─────────────────────────────────────────
   fastify.get('/api/p/:username', async (req, reply) => {
+    if (await checkRateLimit(req, reply, 'public')) return
     const { username } = req.params as { username: string }
 
     const { error, data } = await getPublicProfile(username)
@@ -33,6 +36,7 @@ export async function publicRoutes(fastify: FastifyInstance) {
   // POST /api/p/:username/view — Görüntüleme kaydet (auth yok)
   // ─────────────────────────────────────────
   fastify.post('/api/p/:username/view', async (req, reply) => {
+    if (await checkRateLimit(req, reply, 'public')) return
     const { username } = req.params as { username: string }
 
     const { error, data } = await getPublicProfile(username)
@@ -61,9 +65,28 @@ export async function publicRoutes(fastify: FastifyInstance) {
   // Body: { unlockToken?: string }
   // ─────────────────────────────────────────
   fastify.post('/api/p/r/:linkId', async (req, reply) => {
+    // Katman 1: genel public limiti (IP başına 120/dk)
+    if (await checkRateLimit(req, reply, 'public')) return
+
     const { linkId } = req.params as { linkId: string }
     const body = req.body as { unlockToken?: string } | undefined
     const unlockToken = body?.unlockToken ?? null
+
+    // Katman 2: clickLimit DoS koruması — IP+linkId başına 5 dakikada 10 tıklama.
+    // Bir bot genel limiti aşmadan tek linke saldırıp clickLimit'i tüketemesin.
+    if (process.env.DISABLE_RATE_LIMIT !== 'true') {
+      const ip = getVisitorIp(req)
+      const clickKey = `taplink:rl:click:${linkId}:${ip}`
+      const clickCount = await redis.incr(clickKey)
+      if (clickCount === 1) await redis.expire(clickKey, 300)
+      if (clickCount > 10) {
+        return reply.status(429).send({
+          success: false,
+          code:    'TOO_MANY_REQUESTS',
+          message: 'Bu linke çok fazla istek gönderildi.',
+        })
+      }
+    }
 
     const { error, url } = await processLinkClick(linkId, unlockToken)
 
