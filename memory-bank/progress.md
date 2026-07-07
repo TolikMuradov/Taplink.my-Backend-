@@ -2,9 +2,8 @@
 
 ## Genel Durum
 
-**Aşama:** Uygulama başladı. **Step 01–06 tamamlandı ve main'e merge edildi.**
-Sırada **Step 07 (Dosya Yükleme — Cloudflare R2)** — dış servis (R2) hazırlığı
-gerektirir.
+**Aşama:** Uygulama başladı. **Step 01–07 tamamlandı ve main'e merge edildi.**
+Sırada **Step 08 (Analytics)** — Redis (kurulu) kullanır, yeni dış servis yok.
 
 **Geliştirme ortamı kuruldu (kullanıcı makinesi, macOS/brew):** Node.js (v26),
 pnpm (v11.10), PostgreSQL@16. `taplink_dev` veritabanı var, migration uygulandı,
@@ -50,6 +49,11 @@ inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
   kartı FREE → 403, hash sızmıyor (hasPassword). **Düzeltmeler:** (1) `getProfileContext`
   helper'ı (session'da profileId/plan yok); (2) Prisma select'te `password:false`
   yerine alan hiç seçilmedi.
+- **Step 07 ✅** — Dosya yükleme: R2 (S3 client) + Sharp (WebP, resize, EXIF strip),
+  avatar/background/card upload+delete, @fastify/multipart. R2 bilgileri .env'de
+  (bucket taplink-assets, r2.dev public URL). Doğrulandı: avatar → WebP → R2 url;
+  geçersiz dosya → 400. **Düzeltme:** Sharp `.withMetadata(false)` kaldırıldı
+  (varsayılan zaten EXIF strip eder). sharp `allowBuilds`'e eklendi.
 
 ## Yapılacaklar (Step Sırasıyla)
 
@@ -61,8 +65,8 @@ inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
 | 04 | Auth & kullanıcı | ✅ Tamam (merge) | Better Auth, Google OAuth, Mailjet, requireAuth, auth rate limit, /me endpoint'leri |
 | 05 | Profil modülü | ✅ Tamam (merge) | Curated şablonlar, requirePlan, profil CRUD, username kontrol |
 | 06 | Link & block modülü | ✅ Tamam (merge) | Block CRUD, reorder, metadata late-binding, collection, unlock |
-| 07 | Dosya yükleme (R2) | ⬜ Sıradaki | Sharp pipeline, R2 upload/delete, avatar/bg/card — R2 hesabı gerekir |
-| 08 | Analytics | ⬜ Planlandı | Redis buffer, HyperLogLog, batch flush, overview/links/breakdown |
+| 07 | Dosya yükleme (R2) | ✅ Tamam (merge) | Sharp pipeline, R2 upload/delete, avatar/bg/card |
+| 08 | Analytics | 🔨 Devam ediyor | Redis buffer, HyperLogLog, batch flush, overview/links/breakdown |
 | 09 | Public profil API | ⬜ Planlandı | İki katmanlı cache, tıklama akışı, cache invalidation (EN KRİTİK) |
 | 10 | Forms, capture, notifications | ⬜ Planlandı | Lead/Subscriber kaydı, in-app bildirim, CSV export |
 | 11 | Rate limiting | ⬜ Planlandı | Merkezi checkRateLimit, limit grupları, global plugin (prod öncesi zorunlu) |

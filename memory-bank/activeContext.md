@@ -2,22 +2,27 @@
 
 ## Şu Anki Çalışma Odağı
 
-**Step 06 — Link & Block Modülü** üzerinde çalışılıyor (`step-06-link-block-modulu`).
-Step 01-05 tamam+merge. Auth + profil çalışıyor. Ekstra servis YOK (bcryptjs eklenir).
+**Step 08 — Analytics** üzerinde çalışılıyor (`step-08-analytics`).
+Step 01-07 tamam+merge. Redis kurulu (Upstash), yeni dış servis yok.
 
-Step 06 kapsamı: block CRUD, reorder (batch), metadata late-binding validation
-(type+cardStyle → doğru Zod şeması), COLLECTION self-relation, şifreli link unlock,
-PRO kilitleri (music/book/video/product card + IMAGE/MAP/FAQ/CONTACT_FORM/
-EMAIL_CAPTURE/COLLECTION + schedule/password/clickLimit).
+Step 08 kapsamı: ziyaretçi tıklama/görüntüleme kaydı (Redis buffer + HyperLogLog),
+5 dakikada bir batch flush (atomic RENAME) → PostgreSQL, overview/links (FREE:30g,
+PRO:365g) + breakdown (ülke/cihaz/referrer/saat — sadece PRO).
 
-### ⚠️ Önemli düzeltme (Step 06'da uygulanıyor)
-Better Auth session `user` nesnesinde `profileId` ve `plan` YOK (sadece id, name,
-email, emailVerified, image, createdAt, updatedAt). Dokümanın Step 06 kodu
-`req.user.profileId` ve `req.user.plan` kullanıyor — bunlar undefined olur.
-Çözüm: `utils/context.ts` içinde `getProfileContext(userId)` helper'ı — userId'den
-tek sorguda `{ profileId, plan }` çeker (profile.id + user.plan). Tüm authed
-route'lar (link, sonra analytics/leads) bunu kullanır. (Step 05 profil route'u
-zaten plan'ı DB'den çekiyordu — aynı yaklaşım.)
+### ⚠️ Bilinen düzeltmeler (Step 08'de uygulanıyor)
+1. `redis` importu: dokümanda `'../auth/auth.service'` yazıyor — YANLIŞ, doğrusu
+   `'../../lib/redis'` (Step 04'te kuruldu).
+2. `getBreakdown` `$queryRaw` içinde `FROM "Click"` → tablo adı @@map ile "click";
+   `FROM "click"` olmalı. Kolonlar camelCase quoted ("createdAt","profileId","linkId").
+3. analytics.routes `req.user.profileId/plan` kullanıyor → yok. `getProfileContext`
+   (Step 06) ile çekilecek.
+
+## Genel Hatırlatmalar
+- Better Auth session user'ında profileId/plan YOK → `utils/context.ts`
+  `getProfileContext(userId)` kullan (link, analytics, leads).
+- Env kimlikleri kurulu (Google/Redis/Mailjet/R2). Test kullanıcısı:
+  tolikmuradov00@gmail.com / Test1234 (emailVerified, FREE).
+- localhost linkler sadece sunucuyu çalıştıran Mac'te açılır.
 
 ## Env Kimlik Bilgileri (kuruldu — apps/api/.env, gitignore'da)
 Google OAuth, Upstash Redis, Mailjet (API Key+Secret), BETTER_AUTH_SECRET hepsi
