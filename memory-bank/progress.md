@@ -2,9 +2,13 @@
 
 ## Genel Durum
 
-**Aşama:** Uygulama başladı. **Step 01–11 tamamlandı ve main'e merge edildi.**
-Sırada **son backend step'i: Step 12 (Stripe)** — abonelik, checkout, webhook.
-Sonra Frontend başlar.
+**Aşama:** 🎉 **BACKEND TAMAMLANDI — Step 01–12 hepsi merge edildi.**
+Tüm modüller yazıldı, test edildi, çalışıyor. Sırada **Frontend (apps/web, Next.js)**.
+
+Çalışan sistem: Fastify API (port 3001), PostgreSQL, Upstash Redis, Cloudflare R2,
+Mailjet, Stripe (test modu). Auth (email+Google), profil, blok sistemi, dosya
+yükleme, analytics, public API (2 katmanlı cache), forms/leads/notifications,
+rate limiting, Stripe abonelik — hepsi uçtan uca doğrulandı.
 
 **Geliştirme ortamı kuruldu (kullanıcı makinesi, macOS/brew):** Node.js (v26),
 pnpm (v11.10), PostgreSQL@16. `taplink_dev` veritabanı var, migration uygulandı,
@@ -45,6 +49,14 @@ inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
 - **Step 05 ✅** — Profil modülü: `utils/plan.ts` (hasPlan/requirePlan), 4 curated
   şablon, profil CRUD, username kontrol, `/api/templates`. Plan kilitleri service
   katmanında. Doğrulandı: FREE hesapta custom tasarım → 403.
+- **Step 07–12 ✅** — R2 dosya yükleme (Sharp WebP), analytics (Redis buffer +
+  HyperLogLog + batch flush), public API (2 katmanlı cache + tıklama akışı +
+  cache invalidation), forms/leads/notifications (Lead/Subscriber + in-app bildirim
+  + CSV + Mailjet), rate limiting (@upstash/ratelimit, form/public/upload/general +
+  per-link DoS), Stripe (checkout/portal/webhook/plan sync). Hepsi test edildi.
+  Ortak düzeltmeler: `getProfileContext` (session'da profileId/plan yok, effective
+  plan planExpiresAt'e göre), @upstash otomatik-serialize, doküman import/paket adı
+  hataları (auth.email→auth.mailer, @fastify/rawbody→fastify-raw-body, "Click"→"click").
 - **Step 06 ✅** — Link & block modülü: block CRUD, reorder, metadata late-binding,
   collection self-relation, şifreli unlock (bcrypt). Doğrulandı: basic 201, music
   kartı FREE → 403, hash sızmıyor (hasPassword). **Düzeltmeler:** (1) `getProfileContext`
@@ -71,9 +83,9 @@ inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
 | 09 | Public profil API | ✅ Tamam (merge) | İki katmanlı cache, tıklama akışı, cache invalidation (EN KRİTİK) |
 | 10 | Forms, capture, notifications | ✅ Tamam (merge) | Lead/Subscriber kaydı, in-app bildirim, CSV export |
 | 11 | Rate limiting | ✅ Tamam (merge) | Merkezi checkRateLimit, limit grupları, global plugin (prod öncesi zorunlu) |
-| 12 | Stripe | 🔨 Devam ediyor | Checkout, Portal, webhook, plan sync, planExpiresAt |
+| 12 | Stripe | ✅ Tamam (merge) | Checkout, Portal, webhook, plan sync, planExpiresAt |
 
-Sonra: **Frontend (`apps/web`, Next.js)** — tüm backend bittikten sonra.
+**➡️ SIRADA: Frontend (`apps/web`, Next.js)** — tüm backend bitti.
 
 ## Bilinen Konular / Dikkat Noktaları
 

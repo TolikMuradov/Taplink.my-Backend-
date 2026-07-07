@@ -2,27 +2,28 @@
 
 ## Şu Anki Çalışma Odağı
 
-**Step 08 — Analytics** üzerinde çalışılıyor (`step-08-analytics`).
-Step 01-07 tamam+merge. Redis kurulu (Upstash), yeni dış servis yok.
+🎉 **Backend tamamen bitti (Step 01–12 merge).** Sırada **Frontend (`apps/web`,
+Next.js App Router)** — henüz başlanmadı, yaklaşım kullanıcıyla netleştirilecek.
 
-Step 08 kapsamı: ziyaretçi tıklama/görüntüleme kaydı (Redis buffer + HyperLogLog),
-5 dakikada bir batch flush (atomic RENAME) → PostgreSQL, overview/links (FREE:30g,
-PRO:365g) + breakdown (ülke/cihaz/referrer/saat — sadece PRO).
-
-### ⚠️ Bilinen düzeltmeler (Step 08'de uygulanıyor)
-1. `redis` importu: dokümanda `'../auth/auth.service'` yazıyor — YANLIŞ, doğrusu
-   `'../../lib/redis'` (Step 04'te kuruldu).
-2. `getBreakdown` `$queryRaw` içinde `FROM "Click"` → tablo adı @@map ile "click";
-   `FROM "click"` olmalı. Kolonlar camelCase quoted ("createdAt","profileId","linkId").
-3. analytics.routes `req.user.profileId/plan` kullanıyor → yok. `getProfileContext`
-   (Step 06) ile çekilecek.
+## Frontend'e başlarken hatırlanacaklar
+- **API hazır ve çalışıyor** (localhost:3001). Tüm endpoint'ler `{success,data}` /
+  `{success,code,message}` sözleşmesinde. Frontend `code`'u kendi diline çevirir.
+- **Auth cookie-based** (Better Auth). Frontend fetch'lerinde `credentials:'include'`.
+  Cross-machine test için Tailscale Serve (HTTPS) + BETTER_AUTH_URL güncellemesi gerekir.
+- **Public profil:** `GET /api/p/:username` (ISR `revalidate=60` + CDN). Sayfa
+  `apps/web/src/app/[username]/page.tsx`. Tıklama `POST /api/p/r/:linkId`, görüntüleme
+  `POST /api/p/:username/view`. Cache invalidation için Next.js `revalidatePath`/tag.
+- **DesignSettings → CSS değişkenleri** olarak inject edilir (blok cascade sistemi).
+- Diller: en/th/id/tl/vi/tr. Fontlar Google Fonts (DesignSettings.text.fontFamily).
 
 ## Genel Hatırlatmalar
-- Better Auth session user'ında profileId/plan YOK → `utils/context.ts`
-  `getProfileContext(userId)` kullan (link, analytics, leads).
-- Env kimlikleri kurulu (Google/Redis/Mailjet/R2). Test kullanıcısı:
-  tolikmuradov00@gmail.com / Test1234 (emailVerified, FREE).
-- localhost linkler sadece sunucuyu çalıştıran Mac'te açılır.
+- Env kimlikleri kurulu: Google OAuth, Upstash Redis, Mailjet, Cloudflare R2,
+  Stripe (test). Hepsi `apps/api/.env` (gitignore).
+- Test kullanıcısı: tolikmuradov00@gmail.com / Test1234 (Stripe testinde PRO oldu).
+  Seed: testuser (public, 5 link).
+- Session user'ında profileId/plan YOK → `getProfileContext(userId)` kullanılır.
+- localhost linkler sadece sunucuyu çalıştıran Mac'te açılır (Tailscale Serve ile çözülür).
+- Dev'de rate limit kapatmak için `.env` → `DISABLE_RATE_LIMIT=true`.
 
 ## Env Kimlik Bilgileri (kuruldu — apps/api/.env, gitignore'da)
 Google OAuth, Upstash Redis, Mailjet (API Key+Secret), BETTER_AUTH_SECRET hepsi
