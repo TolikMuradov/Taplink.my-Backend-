@@ -3,6 +3,7 @@ import { prisma }         from '@taplink/db'
 import { z }              from 'zod'
 import { ErrorCodes }     from '@taplink/validations'
 import { submitContactForm, submitEmailCapture } from './forms.service'
+import { checkRateLimit } from '../../lib/rate-limit'
 
 const emailSchema = z.string().email().max(200)
 
@@ -13,6 +14,7 @@ export async function formsRoutes(fastify: FastifyInstance) {
   // Rate limiting Step 11'de eklenecek
   // ─────────────────────────────────────────
   fastify.post('/api/p/forms/contact/:linkId', async (req, reply) => {
+    if (await checkRateLimit(req, reply, 'form')) return  // spam koruması (3/5dk)
     const { linkId } = req.params as { linkId: string }
 
     const link = await prisma.link.findFirst({
@@ -64,6 +66,7 @@ export async function formsRoutes(fastify: FastifyInstance) {
   // POST /api/p/forms/subscribe/:linkId — ziyaretçi email capture (auth yok)
   // ─────────────────────────────────────────
   fastify.post('/api/p/forms/subscribe/:linkId', async (req, reply) => {
+    if (await checkRateLimit(req, reply, 'form')) return  // spam koruması (3/5dk)
     const { linkId } = req.params as { linkId: string }
 
     const link = await prisma.link.findFirst({

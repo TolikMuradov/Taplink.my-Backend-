@@ -3,6 +3,7 @@ import { requireAuth } from '../auth/auth.middleware'
 import { prisma } from '@taplink/db'
 import { processAndUpload, deleteFromR2 } from './upload.service'
 import { invalidateProfileCacheByUserId } from '../../lib/cache'
+import { checkRateLimit } from '../../lib/rate-limit'
 
 // @fastify/multipart app.ts'de bir kez register edilir (aşağıya bak) —
 // bu dosyada tekrar register etme.
@@ -15,6 +16,7 @@ export async function uploadRoutes(fastify: FastifyInstance) {
   // ─────────────────────────────────────────
   fastify.post('/api/upload/avatar', { preHandler: [requireAuth] }, async (req, reply) => {
     const user = req.user!
+    if (await checkRateLimit(req, reply, 'upload', user.id)) return
 
     const data = await req.file()
     if (!data) {
@@ -54,6 +56,7 @@ export async function uploadRoutes(fastify: FastifyInstance) {
   // ─────────────────────────────────────────
   fastify.post('/api/upload/background', { preHandler: [requireAuth] }, async (req, reply) => {
     const user = req.user!
+    if (await checkRateLimit(req, reply, 'upload', user.id)) return
 
     const data = await req.file()
     if (!data) {
@@ -95,6 +98,7 @@ export async function uploadRoutes(fastify: FastifyInstance) {
   // ─────────────────────────────────────────
   fastify.post('/api/upload/card-image', { preHandler: [requireAuth] }, async (req, reply) => {
     const user = req.user!
+    if (await checkRateLimit(req, reply, 'upload', user.id)) return
 
     const data = await req.file()
     if (!data) {

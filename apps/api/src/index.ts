@@ -3,6 +3,7 @@ import Fastify from 'fastify'
 import multipart from '@fastify/multipart'
 import corsPlugin from './plugins/cors'
 import helmetPlugin from './plugins/helmet'
+import rateLimitPlugin from './plugins/rate-limit.plugin'
 import authPlugin from './modules/auth/auth.plugin'
 import { userRoutes } from './modules/auth/user.routes'
 import { profileRoutes } from './modules/profile/profile.routes'
@@ -38,6 +39,9 @@ server.register(multipart, {
     files:    1,                  // tek seferde 1 dosya
   },
 })
+
+// Global rate limit (dashboard 'general') — route'lardan önce
+server.register(rateLimitPlugin)
 
 // Auth modülü — session preHandler, /api/auth/*, /api/me endpoint'leri
 server.register(authPlugin)
