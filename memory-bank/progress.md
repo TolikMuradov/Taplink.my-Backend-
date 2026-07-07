@@ -2,9 +2,9 @@
 
 ## Genel Durum
 
-**Aşama:** Uygulama başladı. **Step 01–08 tamamlandı ve main'e merge edildi.**
-Sırada **Step 09 (Public Profil API)** — projenin EN KRİTİK parçası (ziyaretçi
-tarafı, 2 katmanlı cache, tıklama akışı, cache invalidation). Yeni dış servis yok.
+**Aşama:** Uygulama başladı. **Step 01–09 tamamlandı ve main'e merge edildi.**
+Sırada **Step 10 (Forms / Leads / Notifications)**. Yeni dış servis yok
+(Mailjet zaten kurulu; şema modelleri Step 02'de mevcut → migration gerekmez).
 
 **Geliştirme ortamı kuruldu (kullanıcı makinesi, macOS/brew):** Node.js (v26),
 pnpm (v11.10), PostgreSQL@16. `taplink_dev` veritabanı var, migration uygulandı,
@@ -68,8 +68,8 @@ inceleyip doğrular, sonra main'e `--no-ff` merge edilir.
 | 06 | Link & block modülü | ✅ Tamam (merge) | Block CRUD, reorder, metadata late-binding, collection, unlock |
 | 07 | Dosya yükleme (R2) | ✅ Tamam (merge) | Sharp pipeline, R2 upload/delete, avatar/bg/card |
 | 08 | Analytics | ✅ Tamam (merge) | Redis buffer, HyperLogLog, batch flush, overview/links/breakdown |
-| 09 | Public profil API | 🔨 Devam ediyor | İki katmanlı cache, tıklama akışı, cache invalidation (EN KRİTİK) |
-| 10 | Forms, capture, notifications | ⬜ Planlandı | Lead/Subscriber kaydı, in-app bildirim, CSV export |
+| 09 | Public profil API | ✅ Tamam (merge) | İki katmanlı cache, tıklama akışı, cache invalidation (EN KRİTİK) |
+| 10 | Forms, capture, notifications | 🔨 Devam ediyor | Lead/Subscriber kaydı, in-app bildirim, CSV export |
 | 11 | Rate limiting | ⬜ Planlandı | Merkezi checkRateLimit, limit grupları, global plugin (prod öncesi zorunlu) |
 | 12 | Stripe | ⬜ Planlandı | Checkout, Portal, webhook, plan sync, planExpiresAt |
 
