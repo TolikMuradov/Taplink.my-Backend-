@@ -1,11 +1,13 @@
 import 'dotenv/config'
 import Fastify from 'fastify'
+import multipart from '@fastify/multipart'
 import corsPlugin from './plugins/cors'
 import helmetPlugin from './plugins/helmet'
 import authPlugin from './modules/auth/auth.plugin'
 import { userRoutes } from './modules/auth/user.routes'
 import { profileRoutes } from './modules/profile/profile.routes'
 import { linkRoutes } from './modules/link/link.routes'
+import { uploadRoutes } from './modules/upload/upload.routes'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -23,6 +25,14 @@ const server = Fastify({
 server.register(corsPlugin)
 server.register(helmetPlugin)
 
+// Dosya yükleme desteği (multipart/form-data) — route'lardan ÖNCE register edilmeli
+server.register(multipart, {
+  limits: {
+    fileSize: 10 * 1024 * 1024,  // 10MB hard limit — Sharp'a gitmeden
+    files:    1,                  // tek seferde 1 dosya
+  },
+})
+
 // Auth modülü — session preHandler, /api/auth/*, /api/me endpoint'leri
 server.register(authPlugin)
 server.register(userRoutes)
@@ -32,6 +42,9 @@ server.register(profileRoutes)
 
 // Link & Block modülü — /api/links/*
 server.register(linkRoutes)
+
+// Dosya yükleme — /api/upload/*
+server.register(uploadRoutes)
 
 // Sağlık kontrolü endpoint'i
 // /api/health olarak tanımlıyoruz — Step 11'deki rate limit muafiyet listesiyle tutarlı
