@@ -4,6 +4,7 @@ import corsPlugin from './plugins/cors'
 import helmetPlugin from './plugins/helmet'
 import authPlugin from './modules/auth/auth.plugin'
 import { userRoutes } from './modules/auth/user.routes'
+import { profileRoutes } from './modules/profile/profile.routes'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -24,6 +25,9 @@ server.register(helmetPlugin)
 // Auth modülü — session preHandler, /api/auth/*, /api/me endpoint'leri
 server.register(authPlugin)
 server.register(userRoutes)
+
+// Profil modülü — /api/profile/*, /api/templates
+server.register(profileRoutes)
 
 // Sağlık kontrolü endpoint'i
 // /api/health olarak tanımlıyoruz — Step 11'deki rate limit muafiyet listesiyle tutarlı
