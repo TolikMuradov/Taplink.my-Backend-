@@ -2,6 +2,7 @@ import { prisma } from '@taplink/db'
 import { UpdateProfileInput, ErrorCodes } from '@taplink/validations'
 import { DEFAULT_DESIGN, type DesignSettings } from '@taplink/types'
 import { CURATED_TEMPLATES, isTemplateAvailableForPlan } from './profile.templates'
+import { invalidateProfileCacheByUserId } from '../../lib/cache'
 
 // Profili getir — kullanıcı ID'sine göre
 export async function getProfileByUserId(userId: string) {
@@ -86,6 +87,7 @@ export async function updateProfile(
     },
   })
 
+  await invalidateProfileCacheByUserId(userId)   // public cache'i temizle
   return { success: true }
 }
 
@@ -103,4 +105,6 @@ export async function resetProfile(userId: string) {
       seoDescription: null,
     },
   })
+
+  await invalidateProfileCacheByUserId(userId)
 }

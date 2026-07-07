@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify'
 import { requireAuth } from '../auth/auth.middleware'
 import { prisma } from '@taplink/db'
 import { processAndUpload, deleteFromR2 } from './upload.service'
+import { invalidateProfileCacheByUserId } from '../../lib/cache'
 
 // @fastify/multipart app.ts'de bir kez register edilir (aşağıya bak) —
 // bu dosyada tekrar register etme.
@@ -44,6 +45,7 @@ export async function uploadRoutes(fastify: FastifyInstance) {
       await deleteFromR2(profile.avatarUrl)
     }
 
+    await invalidateProfileCacheByUserId(user.id)
     return reply.send({ success: true, data: { url } })
   })
 
@@ -81,6 +83,7 @@ export async function uploadRoutes(fastify: FastifyInstance) {
       await deleteFromR2(profile.backgroundUrl)
     }
 
+    await invalidateProfileCacheByUserId(user.id)
     return reply.send({ success: true, data: { url } })
   })
 
@@ -127,6 +130,7 @@ export async function uploadRoutes(fastify: FastifyInstance) {
         where: { userId: user.id },
         data:  { avatarUrl: null },
       })
+      await invalidateProfileCacheByUserId(user.id)
     }
 
     return reply.send({ success: true })
@@ -149,6 +153,7 @@ export async function uploadRoutes(fastify: FastifyInstance) {
         where: { userId: user.id },
         data:  { backgroundUrl: null },
       })
+      await invalidateProfileCacheByUserId(user.id)
     }
 
     return reply.send({ success: true })
