@@ -56,22 +56,7 @@ export function getCountry(req: FastifyRequest): string | null {
 
 // ─────────────────────────────────────────
 // ŞİFRE TOKEN DOĞRULAMA
-// Step 06 unlock endpoint'i base64("linkId:timestamp") üretir, 30 dk geçerli
+// HMAC imzalı — implementasyon lib/link-token.ts'te (üretim + doğrulama tek yerde).
+// Buradan re-export ediyoruz (public.service bu isimle import ediyor).
 // ─────────────────────────────────────────
-const TOKEN_MAX_AGE_MS = 30 * 60 * 1000  // 30 dakika
-
-export function verifyUnlockToken(token: string, linkId: string): boolean {
-  try {
-    const decoded = Buffer.from(token, 'base64').toString('utf8')
-    const [tokenId, timestampStr] = decoded.split(':')
-    const timestamp = parseInt(timestampStr, 10)
-
-    if (tokenId !== linkId) return false
-    if (isNaN(timestamp))   return false
-    if (Date.now() - timestamp > TOKEN_MAX_AGE_MS) return false
-
-    return true
-  } catch {
-    return false
-  }
-}
+export { verifyUnlockToken } from '../../lib/link-token'
